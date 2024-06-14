@@ -1,22 +1,21 @@
--- Yes, I know This Is Shit.
 local PLAYER = game.Players.LocalPlayer
 local CurrentCam  = game.Workspace.CurrentCamera
-local UIS = game:GetService("UserInputService")-- Made By Mick Gordon
+local UIS = game:GetService("UserInputService")-- Made By do5snt_matter
 local WorldToViewportPoint = CurrentCam.WorldToViewportPoint
 local mouseLocation = UIS.GetMouseLocation
 
-game:GetService("StarterGui"):SetCore("SendNotification", {Title = "Made By Mick Gordon", Text = "Enjoy !"})
+game:GetService("StarterGui"):SetCore("SendNotification", {Title = "Made By do5snt_matter", Text = "Go fuck yourself "})
 
 local DeleteMob ={
     GUi = {
         OpenNCloseButton = true; -- Have A Button For It
-        KeybindEnable = false; -- If You Want A Bind For The Menu
-        Keybind = "z"; -- Menu Key Bind
+        KeybindEnable = true; -- If You Want A Bind For The Menu
+        Keybind = "k"; -- Menu Key Bind
     };
 	Aimbot= {
         Keybind = "MouseButton2"; -- Change Aim Bot Key Bind Here !!! No Capitals, Unless it is MouseButton1 or MouseButton2
 ------------------------------------------------------------------------------------------
-		Enabled = false; -- No Need To Change Anything Here As It Is On The GUI
+		Enabled = false; -- dont change shit
 		TeamCheck = false;
 		WallCheck = false;
 		ShowFov = false;
@@ -66,7 +65,7 @@ local DeleteMob ={
 	}-- Made By Mick Gordon
 }
 
--- Made By Mick Gordon
+-- Made By do5snt_matter
 local Fov = Instance.new("ScreenGui")Fov.Name = "Fov" Fov.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui") Fov.ZIndexBehavior = Enum.ZIndexBehavior.Sibling Fov.ResetOnSpawn = false-- i miss you synapse fov
 local TracersG = Instance.new("ScreenGui")TracersG.Name = "Tracers" TracersG.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui") TracersG.ZIndexBehavior = Enum.ZIndexBehavior.Sibling TracersG.ResetOnSpawn = false
 local FOVFFrame = Instance.new("Frame")FOVFFrame.Parent = Fov FOVFFrame.Name = "FOVFFrame" FOVFFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255) FOVFFrame.BorderColor3 = Color3.fromRGB(0, 0, 0) FOVFFrame.BorderSizePixel = 0 FOVFFrame.BackgroundTransparency = 1 FOVFFrame.AnchorPoint = Vector2.new(0.5, 0.5) FOVFFrame.Position = UDim2.new(0.5, 0,0.5, 0) FOVFFrame.Size = UDim2.new(0, DeleteMob.Aimbot.Fov, 0, DeleteMob.Aimbot.Fov) FOVFFrame.BackgroundTransparency = 1 
@@ -129,8 +128,8 @@ local function AddHighlight(plr)
 	end)
 	coroutine.resume(co)
 end
--- Made By Mick Gordon
-local function AddBox(player) -- Saves FPS 
+-- Made By do5snt_matter
+local function AddBox(player) -- fps++
 	local bbg = Instance.new("BillboardGui", BoxC)
 	bbg.Name = player.Name
 	bbg.AlwaysOnTop = true
@@ -210,7 +209,6 @@ local function AddBox(player) -- Saves FPS
 	bar.Position = UDim2.new(0,0,1,0)
 	bar.Size = UDim2.new(1,0,1,0)
 
-	-- Made By Mick Gordon
 	local co = coroutine.create(function()
 		while wait(0.1) do
 			if player ~= PLAYER and player and player.Character and player.Character.FindFirstChild(player.Character, "Humanoid") and player.Character.Humanoid.Health > 0 then
@@ -255,7 +253,6 @@ local function AddBox(player) -- Saves FPS
 					namelabel.Visible = false
 				end
 
-				-- Made By Mick Gordon
 				if DeleteMob.ESP.Box.Distance == true then
 					distancel.Visible = true
 					if PLAYER.Character and PLAYER.Character:FindFirstChild("HumanoidRootPart") ~= nil then
@@ -275,7 +272,6 @@ local function AddBox(player) -- Saves FPS
 					info.Enabled = true
 					forhealth.Enabled = true
 				end
-				-- Made By Mick Gordon
 
 				if DeleteMob.ESP.Box.TeamColor == true then
 					left.BackgroundColor3 = player.TeamColor.Color
@@ -297,7 +293,7 @@ local function AddBox(player) -- Saves FPS
 				if not (game:GetService"Players":FindFirstChild(player.Name)) then
 					BoxC:FindFirstChild(player.Name):Destroy()
 					coroutine.yield()
-				end-- Made By Mick Gordon
+				end
 			else
 				bbg.Enabled = false
 				bbg.Adornee = nil
@@ -313,7 +309,7 @@ end
 
 
 local function AddTracers(Player) -- Tracers Without Lib OMG !!!!
-	local tracer = Instance.new("Frame") -- Idk What I Was Smoking When Making This Scrip Hub, It Is Shit And I Will Remake Later 
+	local tracer = Instance.new("Frame") -- idk what to put here now
 	tracer.Parent = TracersG
 	tracer.Name = Player.Name
 	tracer.Active = false
@@ -356,7 +352,7 @@ local function AddTracers(Player) -- Tracers Without Lib OMG !!!!
 						end
 					else
 						tracer.Visible = false
-					end-- Made By Mick Gordon
+					end
 
 					if DeleteMob.ESP.Tracers.TeamColor == true then
 						tracer.BackgroundColor3 = Player.TeamColor.Color
@@ -407,7 +403,7 @@ function CameraGetClosestToMouse(Fov)
 						AimFov = new_magnitude
 						targetPos = v-- Made By Mick Gordon
 					end
-				end-- Made By Mick Gordon
+				end
 			else
 				if v.Character and v.Character:FindFirstChild(DeleteMob.Aimbot.AimPart) and v.Character.Humanoid and v.Character.Humanoid.Health > 0 then
 					local screen_pos, on_screen = WorldToViewportPoint(CurrentCam, v.Character[DeleteMob.Aimbot.AimPart].Position)
@@ -433,7 +429,7 @@ local function aimAt(pos, smooth)
 		if Distance > 100  then
 			local distChangeBig = Distance / 10
 			LookAt = CurrentCam.CFrame:PointToWorldSpace(Vector3.new(0,0,-smooth * distChangeBig)):Lerp(AimPart.Position,.01) -- No one esle do camera smoothing ? tf
-		else-- Made By Mick Gordon
+		else
 			local distChangeSmall = Distance / 10
 			LookAt = CurrentCam.CFrame:PointToWorldSpace(Vector3.new(0,0,-smooth * distChangeSmall)):Lerp(AimPart.Position,.01) -- No one esle do camera smoothing ? tf
 		end
@@ -441,7 +437,6 @@ local function aimAt(pos, smooth)
 	end
 end
 
--- Cant Be Botherd To Clean This Up
 local CheatEngineDeleteMob = Instance.new("ScreenGui")
 local DeleteMobF = Instance.new("Frame")
 local TextBox = Instance.new("TextBox")
@@ -455,7 +450,7 @@ local ABWC = Instance.new("TextButton")
 local ABTC = Instance.new("TextButton")
 local ABSF = Instance.new("TextButton")
 local Frame = Instance.new("Frame")
-local Slider3 = Instance.new("Frame")-- Made By Mick Gordon
+local Slider3 = Instance.new("Frame")
 local UICorner = Instance.new("UICorner")
 local Fill1 = Instance.new("Frame")
 local UICorner_2 = Instance.new("UICorner")
@@ -469,7 +464,7 @@ local UICorner_3 = Instance.new("UICorner")
 local Fill2 = Instance.new("Frame")
 local UICorner_4 = Instance.new("UICorner")
 local UIGradient_2 = Instance.new("UIGradient")
-local TriggerSmoothing = Instance.new("TextButton")-- Made By Mick Gordon
+local TriggerSmoothing = Instance.new("TextButton")
 local Numbers_2 = Instance.new("TextLabel")
 local TextLabel_2 = Instance.new("TextLabel")
 local TextLabel_3 = Instance.new("TextLabel")
@@ -495,7 +490,7 @@ local TextLabel_8 = Instance.new("TextLabel")
 local ESPSection_2 = Instance.new("Frame")
 local UIListLayout_4 = Instance.new("UIListLayout")
 local OE = Instance.new("TextButton")
-local OTC = Instance.new("TextButton")-- Made By Mick Gordon
+local OTC = Instance.new("TextButton")
 local Frame_4 = Instance.new("Frame")
 local Slider1 = Instance.new("Frame")
 local UICorner_5 = Instance.new("UICorner")
@@ -535,7 +530,7 @@ local Frame_8 = Instance.new("Frame")
 local UIListLayout_8 = Instance.new("UIListLayout")
 local Tracers_R = Instance.new("TextBox")
 local Tracers_G = Instance.new("TextBox")
-local Tracers_B = Instance.new("TextBox")-- Made By Mick Gordon
+local Tracers_B = Instance.new("TextBox")
 local Unknown = Instance.new("Frame")
 local UIListLayout_9 = Instance.new("UIListLayout")
 local TextLabel_13 = Instance.new("TextLabel")
@@ -571,8 +566,8 @@ TextBox.Position = UDim2.new(0.791149139, 0, 0.0127403988, 0)
 TextBox.Size = UDim2.new(0, 200, 0, 23)
 TextBox.ClearTextOnFocus = false
 TextBox.Font = Enum.Font.Roboto
-TextBox.PlaceholderText = "https://discord.gg/FsApQ7YNTq"
-TextBox.Text = "https://discord.gg/FsApQ7YNTq - Double Click Me"
+TextBox.PlaceholderText = "https://discord.gg/NPQxx2aBMA"
+TextBox.Text = "https://discord.gg/NPQxx2aBMA - Double Click Me"
 TextBox.TextColor3 = Color3.fromRGB(255, 255, 255)
 TextBox.TextSize = 14.000
 
