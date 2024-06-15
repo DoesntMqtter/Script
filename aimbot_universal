@@ -10,7 +10,7 @@ local DeleteMob ={
     GUi = {
         OpenNCloseButton = true; -- Have A Button For It
         KeybindEnable = true; -- If You Want A Bind For The Menu
-        Keybind = "k"; -- Menu Key Bind
+        Keybind = "MouseButton3"; -- Menu Key Bind
     };
 	Aimbot= {
         Keybind = "MouseButton2"; -- Change Aim Bot Key Bind Here !!! No Capitals, Unless it is MouseButton1 or MouseButton2
