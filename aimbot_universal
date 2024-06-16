@@ -13,7 +13,7 @@ local DeleteMob ={
         Keybind = "o"; -- Menu Key Bind
     };
 	Aimbot= {
-        Keybind = "x"; -- Change Aim Bot Key Bind Here !!! No Capitals, Unless it is MouseButton1 or MouseButton2
+        Keybind = "MouseButton2"; -- Change Aim Bot Key Bind Here !!! No Capitals, Unless it is MouseButton1 or MouseButton2
 ------------------------------------------------------------------------------------------
 		Enabled = false; -- dont change shit
 		TeamCheck = false;
