@@ -26,12 +26,15 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
-local MainTab = Window:CreateTab("", nil) -- Title, Image
+local MainTab = Window:CreateTab("Scripts", nil) -- Title, Image
+local MainSection = MainTab:CreateSection("Main")
+
+local MainTab = Window:CreateTab("Credits", nil) -- Title, Image
 local MainSection = MainTab:CreateSection("Main")
 
 Rayfield:Notify({
    Title = "You executed the Script",
-   Content = "Good Hub",
+   Content = "RobloxHubV1",
    Duration = 5,
    Image = nil,
    Actions = { -- Notification Buttons
@@ -45,12 +48,9 @@ Rayfield:Notify({
 })
 
 local Button = MainTab:CreateButton({
-   Name = "Inf Jump",
+   Name = "Aimbot",
    Callback = function()
-            local infjmp = true
-game:GetService("UserInputService").jumpRequest:Connect(function()
-    if infjmp then
-        game:GetService"Players".LocalPlayer.Character:FindFirstChildOfClass"Humanoid":ChangeState("Jumping")
+     loadstring(game:HttpGet("https://raw.githubusercontent.com/DoesntMqtter/Script/main/aimbot_universal"))()
     end
 end)
    end,
