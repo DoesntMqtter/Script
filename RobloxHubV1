@@ -33,6 +33,13 @@ Tab:AddButton({
   	end    
 })
 
+Tab:AddButton({
+	Name = "Infinite Yield",
+	Callback = function()
+      		loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+  	end    
+})
+
 local Tab = Window:MakeTab({
 	Name = "Credits",
 	Icon = "nil",
