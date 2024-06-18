@@ -34,6 +34,13 @@ Tab:AddButton({
 })
 
 Tab:AddButton({
+	Name = "Project Delta Script",
+	Callback = function()
+      		loadstring(game:HttpGet("https://raw.githubusercontent.com/DoesntMqtter/Script/main/projectdelta"))()
+  	end    
+})
+
+Tab:AddButton({
 	Name = "Infinite Yield",
 	Callback = function()
       		loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
