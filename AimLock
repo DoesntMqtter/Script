@@ -39,7 +39,7 @@ wait(3)
     Library.theme.accentcolor2 = Color3.fromRGB(45, 205, 50)
  
  
-    local Window = Library:CreateWindow("Wuss's Paid Gui", Vector2.new(492, 598), Enum.KeyCode.P)
+    local Window = Library:CreateWindow("someones aimlock gui", Vector2.new(492, 598), Enum.KeyCode.P)
  
      local AimingTab = Window:CreateTab("Aiming")
  
