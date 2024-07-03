@@ -36,7 +36,8 @@ Tab:AddButton({
 Tab:AddButton({
 	Name = "Project Delta Script",
 	Callback = function()
-      		loadstring(game:HttpGet("https://raw.githubusercontent.com/DoesntMqtter/Script/main/projectdelta"))()
+      		getgenv().key = "c01bad9b4c6feeb815d96843409d5fce823f0c40306bb166c7194f67a6a40dd8"
+                loadstring(game:HttpGet("https://api.swimhub.xyz/loader.lua"))()
   	end    
 })
 
