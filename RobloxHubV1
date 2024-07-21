@@ -1,4 +1,4 @@
-local StrToNumber = tonumber;
+local StrToNumber = tonumber; -- Oh wow your so pathetic if your trying to crack
 local Byte = string.byte;
 local Char = string.char;
 local Sub = string.sub;
