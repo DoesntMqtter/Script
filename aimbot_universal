@@ -62,7 +62,7 @@ local DeleteMob ={
 
 			Color = Color3.fromRGB(75,0,10);
 		}
-	}-- Made By Mick Gordon
+	}-- Made By do5snt_matter 
 }
 
 -- Made By do5snt_matter
