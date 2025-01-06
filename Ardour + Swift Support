@@ -53,7 +53,7 @@ if _G.ardour then
 end
 
 local exec = identifyexecutor()
-if string.match(exec, "Synapse") == nil and string.match(exec, "Macsploit") == nil and string.match(exec, "Seliware") == nil and string.match(exec, "Nihon") == nil and string.match(exec, "AWP") == nil then
+if string.match(exec, "Synapse") == nil and string.match(exec, "Macsploit") == nil and string.match(exec, "Seliware") == nil and string.match(exec, "Nihon") == nil and string.match(exec, "AWP") == nil and string.match(exec, "Swift") == nil then
 
     local reqtest = pcall(function()
         require(game.ReplicatedStorage.Modules.FPS)
@@ -109,11 +109,13 @@ local wcamera = workspace.CurrentCamera
 local localplayer = game.Players.LocalPlayer
 local runs = game:GetService("RunService")
 local uis = game:GetService("UserInputService")
+local tweens = game:GetService("TweenService")
 local scriptloading = true
 local ACBYPASS_SYNC = false
 local keybindlist = false
 local keylist_gui 
 local keylist_items = {}
+local a1table
 
 local aimbool = false
 local aimdebug1 = false
@@ -132,6 +134,8 @@ local aimdynamicfov = false
 local aimpart = "Head"
 local aimtype = "Instant Hit"
 local aimfov = 150
+local aimsnapline = Drawing.new("Line") 
+local snaplinebool = false
 local aimdistance = 800 -- meters
 local aimchance = 100
 local aimfakewait = 0
@@ -150,11 +154,91 @@ end
 local selftrack_data = {}
 local selftrack_update = 0
 
+local hitmarkbool = false
+local hitmarkcolor = Color3.fromRGB(255,255,255)
+local hitmarkfade = 2
+local hitsoundbool = false
+local hitsoundhead = "Ding"
+local hitsoundbody = "Blackout"
+local hitsoundlib = {
+    ["TF2"]       = "rbxassetid://8255306220",
+    ["Gamesense"] = "rbxassetid://4817809188",
+    ["Rust"]      = "rbxassetid://1255040462",
+    ["Neverlose"] = "rbxassetid://8726881116",
+    ["Bubble"]    = "rbxassetid://198598793",
+    ["Quake"]     = "rbxassetid://1455817260",
+    ["Among-Us"]  = "rbxassetid://7227567562",
+    ["Ding"]      = "rbxassetid://2868331684",
+    ["Minecraft"] = "rbxassetid://6361963422",
+    ["Blackout"]  = "rbxassetid://3748776946",
+    ["Osu!"]      = "rbxassetid://7151989073",
+}
+local hitsoundlibUI = {}
+for i,v in hitsoundlib do
+    hitsoundlibUI[v] = i
+end
+
+local skychangerbool = false
+local skyboxtable = {
+    ["Standard"] = {
+        SkyboxBk = "rbxassetid://0",  
+        SkyboxDn = "rbxassetid://0",
+        SkyboxFt = "rbxassetid://0",
+        SkyboxLf = "rbxassetid://0",
+        SkyboxRt = "rbxassetid://0",
+        SkyboxUp = "rbxassetid://0"
+    },
+    ["Among Us"] = {
+        SkyboxBk = "rbxassetid://5752463190",
+        SkyboxDn = "rbxassetid://5752463190",
+        SkyboxFt = "rbxassetid://5752463190",
+        SkyboxLf = "rbxassetid://5752463190",
+        SkyboxRt = "rbxassetid://5752463190",
+        SkyboxUp = "rbxassetid://5752463190"
+    },
+    ["Spongebob"] = {
+        SkyboxBk = "rbxassetid://277099484",
+        SkyboxDn = "rbxassetid://277099500",
+        SkyboxFt = "rbxassetid://277099554",
+        SkyboxLf = "rbxassetid://277099531",
+        SkyboxRt = "rbxassetid://277099589",
+        SkyboxUp = "rbxassetid://277101591"
+    },
+    ["Deep Space"] = {
+        SkyboxBk = "rbxassetid://159248188",
+        SkyboxDn = "rbxassetid://159248183",
+        SkyboxFt = "rbxassetid://159248187",
+        SkyboxLf = "rbxassetid://159248173",
+        SkyboxRt = "rbxassetid://159248192",
+        SkyboxUp = "rbxassetid://159248176"
+    },
+    ["Winter"] = {
+        SkyboxBk = "rbxassetid://510645155",
+        SkyboxDn = "rbxassetid://510645130",
+        SkyboxFt = "rbxassetid://510645179",
+        SkyboxLf = "rbxassetid://510645117",
+        SkyboxRt = "rbxassetid://510645146",
+        SkyboxUp = "rbxassetid://510645195"
+    },
+    ["Clouded Sky"] = {
+        SkyboxBk = "rbxassetid://252760981",
+        SkyboxDn = "rbxassetid://252763035",
+        SkyboxFt = "rbxassetid://252761439",
+        SkyboxLf = "rbxassetid://252760980",
+        SkyboxRt = "rbxassetid://252760986",
+        SkyboxUp = "rbxassetid://252762652"
+    },
+}
+
 local rapidfire = false
+local crapidfire = false
+local crapidfirenum = 0.001
 local unlockmodes = false
 local multitaps = 1
 local instrelOGfunc = require(game.ReplicatedStorage.Modules.FPS).reload
 local instrelMODfunc -- changed later
+local instaequip = false
+local noswaybool = false
 
 local aimFRIENDLIST = {}
 local friendlistmode = "Blacklist"
@@ -227,6 +311,7 @@ local camthirdpY = 2
 local camthirdpZ = 5
 local basefov = 120
 local zoomfov = 5
+local antimaskbool = false
 local camzoomfunctionOG = require(game.ReplicatedStorage.Modules.CameraSystem).SetZoomTarget
 local camzoomfunction --changed later
 
@@ -253,6 +338,7 @@ local speedbool = false
 local speedboost = 1.2
 local nojumpcd = false
 local nofall = false
+local instafall = false
 local changerbool = false
 local changergrav = 95
 local changerspeed = 20
@@ -270,18 +356,26 @@ local instantleanMODfunc --changed later
 local worldleaves = false
 local folcheck = workspace:FindFirstChild("SpawnerZones")
 local worldclock = 14
+local worldnomines = false
+local worldnoweather = false
 local waterplatforms = Instance.new("Folder", workspace)
 waterplatforms.Name = "ArdourWaterPlatforms"
 local worldjesus
 local worldambient = Color3.fromRGB(255,255,255)
 local worldoutdoor = Color3.fromRGB(255,255,255)
 local worldexpo = 0
+local colorcorrectbool = false
+local colorcorrectbright = 0
+local colorcorrectcontrast = 0
+local colorcorrectsatur = 0
+local colorcorrecttint = Color3.fromRGB(255,255,255)
 
 local instantrespawn = false
 local espmapactive = false
 local handleESPMAP = function() do end end
 local espmapmarkers = {}
 local detectedmods = {}
+local mdetect = false
 local detectmods = false
 
 local valcache = {
@@ -352,6 +446,11 @@ invchecktext.Visible = true
 invchecktext.Center = false
 invchecktext.Outline = true
 invchecktext.OutlineColor = Color3.new(0, 0, 0)
+aimsnapline.From = Vector2.new(20, 20)
+aimsnapline.To = Vector2.new(50, 50)
+aimsnapline.Color = Color3.fromRGB(255,255,255)
+aimsnapline.Thickness = 1
+aimsnapline.Visible = false
 
 --gui setup--
 
@@ -543,7 +642,7 @@ editwatermark = library.GUI.ChildAdded:Connect(function(ch)
     end
     editwatermark:Disconnect()
 end)
-local watermark = library:AddWatermark('Ardour Hub [FREE] ')
+local watermark = library:AddWatermark('Ardour Hub [BETA] ')
 watermark.AnchorPoint = Vector2.new(0.5, 0.5)
 watermark.Position = UDim2.new(0.5, 0, 0.05, 0)
 
@@ -562,7 +661,7 @@ local worldh = other:AddSection('World')
 local vmisc = other:AddSection('Misc')
 
 
-mainhome:AddLabel('The script version is "Xray - 9" ')
+mainhome:AddLabel('The script version is "Whiskey - 1" ')
 mainhome:AddKeyBind('Toggle GUI', Enum.KeyCode.Insert, function() 
     if scriptloading then return end
     librarymaingui.Visible = not librarymaingui.Visible
@@ -635,17 +734,52 @@ end)
 aim:AddColorPallete('FOV Color', Color3.fromRGB(255, 255, 255),function(a) 
    aimfovcircle.Color = a
 end)
+aim:AddSeparateBar()
+aim:AddToggle('Snapline', true, nil, function(v)
+    snaplinebool = v
+end)
+aim:AddSlider('Thickness', 5, 0.01, 1, function(c) 
+    aimsnapline.Thickness = c
+end)
+aim:AddColorPallete('Color', Color3.fromRGB(255, 255, 255),function(a) 
+    aimsnapline.Color = a
+end)
+aim:AddSeparateBar()
+aim:AddToggle('HitSound', true, nil, function(v)
+    hitsoundbool = v
+end)
+aim:AddDropdown('Head Sound', hitsoundlibUI, hitsoundhead, function(a)
+    hitsoundhead = a
 
+    local preview = Instance.new("Sound", workspace)
+    preview.SoundId = hitsoundlib[a]
+    preview:Play()
+    task.wait(1)
+    preview:Destroy()
+end)
+aim:AddDropdown('Body Sound', hitsoundlibUI, hitsoundbody, function(a)
+    hitsoundbody = a
+
+    local preview = Instance.new("Sound", workspace)
+    preview.SoundId = hitsoundlib[a]
+    preview:Play()
+    task.wait(1)
+    preview:Destroy()
+end)
+aim:AddSeparateBar()
+aim:AddToggle('Hitmarkers', true, nil, function(v)
+    hitmarkbool = v
+end)
+aim:AddColorPallete('Hitmark color', Color3.fromRGB(255, 255, 255),function(a) 
+    hitmarkcolor = a
+end)
+aim:AddSlider('Hitmark fade time', 10, 0, 2, function(c) 
+    hitmarkfade = c
+end)
 
 gunmods:AddToggle('Rapid Fire [IF HOLD GUN - REEQUIP IT]', true, nil, function(v)
     rapidfire = v
-    if v == true then
-        local inv = game.ReplicatedStorage.Players:FindFirstChild(localplayer.Name).Inventory
-        for i,v in ipairs(inv:GetChildren()) do
-            local sett = require(v.SettingsModule)
-            sett.FireRate = 0.002
-        end
-    else
+    if v == false then
         local inv = game.ReplicatedStorage.Players:FindFirstChild(localplayer.Name).Inventory
         for i,v in ipairs(inv:GetChildren()) do
             local sett = require(v.SettingsModule)
@@ -654,6 +788,9 @@ gunmods:AddToggle('Rapid Fire [IF HOLD GUN - REEQUIP IT]', true, nil, function(v
             sett.FireRate = toset
         end
     end
+end)
+gunmods:AddToggle('Custom rapidfire', true, nil, function(v)
+    crapidfire = v
 end)
 gunmods:AddToggle('Unlock firemodes [IF HOLD GUN - REEQUIP IT]', true, nil, function(v)
     unlockmodes = v
@@ -666,8 +803,21 @@ gunmods:AddToggle('Instant Reload', true, nil, function(v)
         require(game.ReplicatedStorage.Modules.FPS).reload = instrelOGfunc
     end
 end)
-gunmods:AddSlider('Multitaps', 5, 1, 1,function(c)
+gunmods:AddToggle('Instant Equip', true, nil, function(v)
+    instaequip = v
+end)
+gunmods:AddToggle('No sway', true, nil, function(v)
+    noswaybool = v
+end)
+gunmods:AddSlider('Multitaps', 5, 1, 1, function(c)
     multitaps = c
+end)
+gunmods:AddTextBox('Custom rapidfire delay', nil, false, 5, function(a)
+    local num = tonumber(a)
+    if num ~= nil then
+        crapidfirenum = num
+        Notify("Ardour", "Set custom rapidfire delay")
+    end
 end)
 
 
@@ -851,6 +1001,7 @@ camer:AddSlider('Offset Z', 10, -10, 5, function(c)
 end)
 camer:AddSeparateBar()
 camer:AddToggle('Anti mask', true, nil, function(v)
+    antimaskbool = v
     if v == true then
         game.Players.LocalPlayer.PlayerGui.MainGui.MainFrame.ScreenEffects.HelmetMask.TitanShield.Size = UDim2.new(0,0,1,0)
         game.Players.LocalPlayer.PlayerGui.MainGui.MainFrame.ScreenEffects.Mask.GP5.Size = UDim2.new(0,0,1,0)
@@ -981,6 +1132,9 @@ end)
 speedh:AddToggle('NoFall', true, nil, function(v)
     nofall = v
 end)
+speedh:AddToggle('InstaFall', true, nil, function(v)
+    instafall = v
+end)
 speedh:AddSeparateBar()
 speedh:AddToggle('Instant Lean', true, nil, function(v)
     if scriptloading then return end
@@ -1064,6 +1218,7 @@ vmisc:AddToggle('Mod notify', true, nil, function(v)
 
     detectmods = v
     if v == false then
+        mdetect = false
         table.clear(detectedmods)
     end
 end)
@@ -1087,6 +1242,13 @@ worldh:AddToggle('No clouds', true, nil, function(v)
         workspace.Terrain.Clouds.Enabled = not v
     end
 end)
+worldh:AddToggle('No weather', true, nil, function(v)
+    worldnoweather = v
+end)
+worldh:AddToggle('No mines', true, nil, function(v)
+    worldnomines = v
+end)
+worldh:AddSeparateBar()
 worldh:AddSlider('Exposure', 4, -4, 0, function(c)
     worldexpo = c
     game.Lighting.ExposureCompensation = c
@@ -1095,6 +1257,61 @@ worldh:AddSlider('Clock time', 24, 0, 14, function(c)
     worldclock = c
     game.Lighting.ClockTime = c
 end)
+worldh:AddSeparateBar()
+worldh:AddToggle('Edit Skybox', true, nil, function(v)
+    skychangerbool = v
+    if v == false then
+        local Sky = game.Lighting:FindFirstChildOfClass("Sky")
+        local selected = skyboxtable["Standard"]
+        Sky.SkyboxBk = selected.SkyboxBk
+        Sky.SkyboxDn = selected.SkyboxDn
+        Sky.SkyboxFt = selected.SkyboxFt
+        Sky.SkyboxLf = selected.SkyboxLf
+        Sky.SkyboxRt = selected.SkyboxRt
+        Sky.SkyboxUp = selected.SkyboxUp
+    end
+end)
+worldh:AddDropdown('Select Skybox', {"Among Us", "Spongebob", "Deep Space", "Winter", "Clouded Sky"}, false, function(skyboxName) --code by ds: _hai_hai
+    local Sky = game.Lighting:FindFirstChildOfClass("Sky")
+    local selected = skyboxtable[skyboxName]
+    if selected and skychangerbool then
+        Sky.SkyboxBk = selected.SkyboxBk
+        Sky.SkyboxDn = selected.SkyboxDn
+        Sky.SkyboxFt = selected.SkyboxFt
+        Sky.SkyboxLf = selected.SkyboxLf
+        Sky.SkyboxRt = selected.SkyboxRt
+        Sky.SkyboxUp = selected.SkyboxUp
+    else
+        print("Invalid Skybox: " .. skyboxName)
+    end
+end)
+worldh:AddSeparateBar()
+worldh:AddToggle('Edit PostEffects', true, nil, function(v)
+    colorcorrectbool = v
+    game.Lighting.GeographicLatitude += 0.1
+    game.Lighting.GeographicLatitude -= 0.1
+end)
+worldh:AddSlider('Brightness', 3, -3, 0, function(c) 
+    colorcorrectbright = c
+    game.Lighting.GeographicLatitude += 0.1
+    game.Lighting.GeographicLatitude -= 0.1
+end)
+worldh:AddSlider('Saturation', 3, -3, 0, function(c) 
+    colorcorrectsatur = c
+    game.Lighting.GeographicLatitude += 0.1
+    game.Lighting.GeographicLatitude -= 0.1
+end)
+worldh:AddSlider('Contrast', 3, -3, 0, function(c) 
+    colorcorrectcontrast = c
+    game.Lighting.GeographicLatitude += 0.1
+    game.Lighting.GeographicLatitude -= 0.1
+end)
+worldh:AddColorPallete('Tint color', Color3.fromRGB(255, 255, 255),function(a) 
+    colorcorrecttint = a
+    game.Lighting.GeographicLatitude += 0.1
+    game.Lighting.GeographicLatitude -= 0.1
+end)
+worldh:AddSeparateBar()
 worldh:AddColorPallete('Ambient Color', Color3.fromRGB(255, 255, 255),function(a) 
     worldambient = a
     game.Lighting.Ambient = worldambient
@@ -1169,13 +1386,19 @@ local function isvisible(char, object)
         return true
     end
 
-    local origin = localplayer.Character.HumanoidRootPart.Position + Vector3.new(0, 1, 0)
+    local origin = localplayer.Character.HumanoidRootPart.Position + Vector3.new(0, 1.3, 0)
     if aimselftrack then
-        local plrping = localplayer:GetNetworkPing()
-        local key = math.floor((plrping + 5) / 10) * 10
+        local plrping = localplayer:GetNetworkPing() * 1000 + 5
+        local key = math.floor(plrping / 10) * 10
 
-        if selftrack_data[key] ~= nil then
-            origin = selftrack_data[key]
+        local onv
+        for _, entry in ipairs(selftrack_data) do
+            if entry.ms == key then
+                onv = entry
+            end
+        end
+        if onv ~= nil then
+            origin = onv.vpos
         end
     end
 
@@ -1196,29 +1419,23 @@ local function isvisible(char, object)
     }
 
     local ray = workspace:Raycast(origin, dir * dist, params)
-    if aimbang then
-        if ray and ray.Instance:IsDescendantOf(char) then
-            return true
-        elseif ray and ray.Instance.Name ~= "Terrain" and not ray.Instance:GetAttribute("NoPen") then
-            local armorpen4 = 10
-            if globalammo then
-                armorpen4 = globalammo:GetAttribute("ArmorPen")
-            end
-
-            local FunctionLibraryExtension = require(game.ReplicatedStorage.Modules.FunctionLibraryExtension)
-            local armorpen1, newpos2 = FunctionLibraryExtension.Penetration(FunctionLibraryExtension, ray.Instance, ray.Position, dir, armorpen4)
-            if armorpen1 == nil or newpos2 == nil then
-                return false
-            end
-
-            local neworigin = ray.Position + dir * 0.01
-            local newray = workspace:Raycast(neworigin, dir * (dist - (neworigin - origin).Magnitude), params)
-            if newray and newray.Instance:IsDescendantOf(char) then
-                return true
-            end
+    if ray and ray.Instance:IsDescendantOf(char) then
+        return true
+    elseif ray and ray.Instance.Name ~= "Terrain" and not ray.Instance:GetAttribute("NoPen") then
+        local armorpen4 = 10
+        if globalammo then
+            armorpen4 = globalammo:GetAttribute("ArmorPen")
         end
-    else
-        if ray and ray.Instance:IsDescendantOf(char) then
+
+        local FunctionLibraryExtension = require(game.ReplicatedStorage.Modules.FunctionLibraryExtension)
+        local armorpen1, newpos2 = FunctionLibraryExtension.Penetration(FunctionLibraryExtension, ray.Instance, ray.Position, dir, armorpen4)
+        if armorpen1 == nil or newpos2 == nil then
+            return false
+        end
+
+        local neworigin = ray.Position + dir * 0.01
+        local newray = workspace:Raycast(neworigin, dir * (dist - (neworigin - origin).Magnitude), params)
+        if newray and newray.Instance:IsDescendantOf(char) then
             return true
         end
     end
@@ -1371,7 +1588,43 @@ local function choosetarget()
         aimtargetpart = cpart
     end
 end
+local function runhitmark(v140)
+    if hitmarkbool then --some code by ds: meowya_1337
+        local hitpart = Instance.new("Part", workspace)
+        hitpart.Transparency = 1
+        hitpart.CanCollide = false
+        hitpart.CanQuery = false
+        hitpart.Size = Vector3.new(0.01,0.01,0.01)
+        hitpart.Anchored = true
+        hitpart.Position = v140
 
+        local hit = Instance.new("BillboardGui")
+        hit.Name = "hit"
+        hit.AlwaysOnTop = true
+        hit.Parent = hitpart
+
+        local hit_img = Instance.new("ImageLabel")
+        hit_img.Name = "hit_img"
+        hit_img.Image = "http://www.roblox.com/asset/?id=13298929624"
+        hit_img.BackgroundTransparency = 1
+        hit_img.Size = UDim2.new(0, 50, 0, 50)
+        hit_img.Visible = true
+        hit_img.ImageColor3 = hitmarkcolor
+        hit_img.Rotation = 45
+        hit_img.AnchorPoint = Vector2.new(0.5, 0.5)
+        hit_img.Parent = hit
+
+        task.spawn(function()
+            local tweninfo = TweenInfo.new(hitmarkfade, Enum.EasingStyle.Sine)
+            local tweninfo2 = TweenInfo.new(hitmarkfade, Enum.EasingStyle.Linear)
+            tweens:Create(hit_img, tweninfo, {ImageTransparency = 1}):Play()
+            tweens:Create(hit_img, tweninfo2, {Rotation = 180}):Play()
+            task.wait(hitmarkfade)
+            hit_img:Destroy()
+            hit:Destroy()
+        end)
+    end
+end
 aimmodfunc = function(prikol, p49, p50, p_u_51, _, p52, p53, p54, p55)
     local v_u_6 = game.ReplicatedStorage.Remotes.VisualProjectile
     local v_u_108 = 1
@@ -1572,13 +1825,25 @@ aimmodfunc = function(prikol, p49, p50, p_u_51, _, p52, p53, p54, p55)
                         end
 
                         v_u_2.Impact(v137, v140, v138, v139, v_u_114, "Ranged", true)
+
+                        task.spawn(function()
+                            runhitmark(v140)
+                        end)
                     elseif v137.Name == "Terrain" then -- if hit terrain
                         local v175 = v137.CFrame:ToObjectSpace(CFrame.new(v140))
                         v_u_5:FireServer(v137, v175, v_u_108, tick())
 
                         v_u_2.Impact(v137, v140, v138, v139, v_u_114, "Ranged", true)
+
+                        task.spawn(function()
+                            runhitmark(v140)
+                        end)
                     else -- if hit not target then try wallpen
                         v_u_2.Impact(v137, v140, v138, v139, v_u_114, "Ranged", true)
+
+                        task.spawn(function()
+                            runhitmark(v140)
+                        end)
 
                         local arg1, arg2, arg3 = v_u_4.Penetration(v_u_4, v137, v140, v_u_114, armorpen4)
                         if arg1 == nil or arg2 == nil then
@@ -1876,22 +2141,22 @@ pcall(function() --paste1
         lighting.OutdoorAmbient = worldoutdoor
         lighting.ClockTime = worldclock
         lighting.ExposureCompensation = worldexpo
+
+        if colorcorrectbool then
+            lighting.PostEffects.Enabled = true
+            lighting.PostEffects.Brightness = colorcorrectbright
+            lighting.PostEffects.Saturation = colorcorrectsatur
+            lighting.PostEffects.Contrast = colorcorrectcontrast
+            lighting.PostEffects.TintColor = colorcorrecttint
+        else
+            lighting.PostEffects.Enabled = false
+        end
+
         local atmo = lighting:FindFirstChildOfClass("Atmosphere")
         if atmo then
             atmo:Destroy()
         end
-    end);
-    spawn(function()
-        local character = localplayer.Character;
-        while wait(2) do
-            repeat wait(2) until character ~= nil;
-            if character:FindFirstChild("HumanoidRootPart") and not character.HumanoidRootPart:FindFirstChildWhichIsA("PointLight") then
-                local headlight = Instance.new("PointLight", character.HumanoidRootPart);
-                headlight.Brightness = 1;
-                headlight.Range = 60;
-            end;
-        end;
-    end);
+    end)
 end)
 
 --camera--
@@ -1945,9 +2210,24 @@ do --fov changer
 end
 
 
+--insta equip 
+print("loading insta equip")
+workspace.Camera.ChildAdded:Connect(function(ch)
+    if instaequip and ch:IsA("Model") then
+        task.wait(0.015)
+        for i,v in ch.Humanoid.Animator:GetPlayingAnimationTracks() do
+            if v.Animation.Name == "Equip" then
+                --v:AdjustSpeed(15)
+                v.TimePosition = v.Length - 0.01
+            end
+        end
+    end
+end)
+
+
 -- third person --
 print("changing thirdperson roblox script")
-require(game.Players.LocalPlayer.PlayerScripts.PlayerModule.CameraModule.TransparencyController).Update = function(a1, a2) -- transparency = 0
+require(game.Players.LocalPlayer.PlayerScripts.PlayerModule.CameraModule.TransparencyController).Update = function(a1, a2) -- transparency = camthirdp and 1 or 0
     local v14_3_ = workspace
     local v14_2_ = v14_3_.CurrentCamera
 
@@ -2473,6 +2753,33 @@ instantleanOGfunc = function(a1,a2,a3)
 end
 
 
+--hitsound-- hitsound method by ds: _hai_hai
+print("loading hitsound")
+localplayer.CharacterAdded:Connect(function(lchar)
+    local maingui = localplayer.PlayerGui:WaitForChild("MainGui")
+    if maingui then
+        maingui.ChildAdded:Connect(function(Sound)
+            if Sound:IsA("Sound") and hitsoundbool then
+                if Sound.SoundId == "rbxassetid://4585351098" or Sound.SoundId == "rbxassetid://4585382589" then --headshot
+                    Sound.SoundId = hitsoundlib[hitsoundhead]
+                elseif Sound.SoundId == "rbxassetid://4585382046" or Sound.SoundId == "rbxassetid://4585364605" then --bodyshot
+                    Sound.SoundId = hitsoundlib[hitsoundbody]
+                end
+            end
+        end)
+    end
+end)
+localplayer.PlayerGui.MainGui.ChildAdded:Connect(function(Sound)
+    if Sound:IsA("Sound") and hitsoundbool then
+        if Sound.SoundId == "rbxassetid://4585351098" or Sound.SoundId == "rbxassetid://4585382589" then --headshot
+            Sound.SoundId = hitsoundlib[hitsoundhead]
+        elseif Sound.SoundId == "rbxassetid://4585382046" or Sound.SoundId == "rbxassetid://4585364605" then --bodyshot
+            Sound.SoundId = hitsoundlib[hitsoundbody]
+        end
+    end
+end)
+
+
 --esp map--
 print("loading espmap function")
 handleESPMAP = function(bool)
@@ -2676,13 +2983,17 @@ handleClientAntiCheatBypass()
 --selftrack(ping check)
 print("loading ping check")
 for i = 10, 1000, 10 do
-    selftrack_data[i] = localplayer.Character.Head.Position
+    --selftrack_data[i] = localplayer.Character.Head.Position
+    table.insert(selftrack_data, {ms = i, vpos = localplayer.Character.HumanoidRootPart.Position + Vector3.new(0, 1.3, 0)})
 end
 local function updateselfpos()
-    for time = 990, 10, -10 do
-        selftrack_data[time + 10] = selftrack_data[time]
+    for i = #selftrack_data, 1, -1 do
+        selftrack_data[i].ms = selftrack_data[i].ms + 10
     end
-    selftrack_data[10] = localplayer.Character.Head.Position
+    if selftrack_data[#selftrack_data].ms > 1000 then
+        table.remove(selftrack_data, #selftrack_data)
+    end
+    table.insert(selftrack_data, 1, {ms = 10, vpos = localplayer.Character.HumanoidRootPart.Position + Vector3.new(0, 1.3, 0)})
 end
 
 
@@ -2700,6 +3011,48 @@ local function ThirdPersonFix()
     setreadonly(mt, true)
 end
 ThirdPersonFix()
+
+
+--fps table editor--
+print("loading fps table editor")
+do
+    local mod = require(game.ReplicatedStorage.Modules.FPS)
+    local ogfunc = mod.updateClient
+
+    mod.updateClient = function(a1,a2,a3)
+        arg1, arg2, arg3 = ogfunc(a1,a2,a3)
+        
+        a1table = a1
+        
+        if noswaybool then
+            a1.springs.sway.Position = Vector3.new(0,0,0)
+            a1.springs.walkCycle.Position = Vector3.new(0,0,0)
+            a1.springs.sprintCycle.Position = Vector3.new(0,0,0)
+            a1.springs.strafeTilt.Position = Vector3.new(0,0,0)
+            a1.springs.jumpTilt.Position = Vector3.new(0,0,0)
+            a1.springs.sway.Speed = 0
+            a1.springs.walkCycle.Speed = 0
+            a1.springs.sprintCycle.Speed = 0
+            a1.springs.strafeTilt.Speed = 0
+            a1.springs.jumpTilt.Speed = 0
+        else
+            a1.springs.sway.Speed = 4
+            a1.springs.walkCycle.Speed = 4
+            a1.springs.sprintCycle.Speed = 4
+            a1.springs.strafeTilt.Speed = 4
+            a1.springs.jumpTilt.Speed = 4
+        end
+        if viewmodoffset then
+            a1.sprintIdleOffset = CFrame.new(Vector3.new(viewmodX, viewmodY, viewmodZ))
+            a1.weaponOffset = CFrame.new(Vector3.new(viewmodX, viewmodY, viewmodZ))
+            a1.AimInSpeed = 9e9
+        else
+            a1.AimInSpeed = 0.4
+        end
+
+        return arg1, arg2, arg3
+    end
+end
 
 
 --skin changer--
@@ -3060,11 +3413,12 @@ print("loading global cycles")
 
 task.spawn(function() -- very slow
     while wait(10.5) do
-        --library:ChangeWeb((string.char(100,111,115,99,111,114,100,46,103,103,47,97,114,100,111,117,114)))
         table.clear(aimignoreparts)
         for i,v in ipairs(workspace:GetDescendants()) do
             if v:GetAttribute("PassThrough") then
                 table.insert(aimignoreparts, v)
+            elseif worldnomines and v.Name == "PMN2" and v:IsA("Model") then
+                v:Destroy()
             end
         end
     end
@@ -3083,21 +3437,63 @@ task.spawn(function() -- slow
         local function handleModDetect()
             if detectmods then
                 for _, player in ipairs(game.Players:GetPlayers()) do
-                    if detectedmods[player.Name] then continue end
+                    if detectedmods[player.Name] ~= nil then continue end
 
                     local pinfo = game.ReplicatedStorage.Players:FindFirstChild(player.Name)
                     if not pinfo then continue end
+                    local status = pinfo:FindFirstChild("Status")
+                    if not status then continue end
 
-                    if pinfo.UAC:GetAttribute("Enabled") == true then
-                        detectedmods[player.Name] = true
-                        Notify("Mod Detected", "UAC Enabled ( ".. player.Name .." ) ")
+                    local function detectmod(plrname, reason)
+                        detectedmods[plrname] = true
+                        if mdetect == true then return end
+                        mdetect = true
+
+                        Notify("Mod Detected", reason.." ( ".. plrname .." ) ")
+                        local notsound = Instance.new("Sound")
+                        notsound.SoundId = "rbxassetid://1841354443"
+                        notsound.Parent = workspace
+                        notsound:Play()
+                        
+                        espexit = true
+                        Notify("Extract ESP Enabled", "due to moderator")
+                    end
+
+                    if status.UAC:GetAttribute("Enabled") == true then
+                        detectmod(player.Name, "uac enabled")
+                        continue
+                    elseif status.GameplayVariables:GetAttribute("Godmode") == true then
+                        detectmod(player.Name, "godmode enabled")
+                        continue
+                    elseif status.GameplayVariables:GetAttribute("PremiumLevel") >= 4 then
+                        detectmod(player.Name, "premium level >= 4")
+                        continue
+                    elseif status.UAC:GetAttribute("A1Detected") == true then
+                        detectmod(player.Name, "A1Detected")
+                        continue
+                    elseif status.UAC:GetAttribute("A2Detected") == true then
+                        detectmod(player.Name, "A2Detected")
+                        continue
+                    elseif status.UAC:GetAttribute("A3Detected") == true then
+                        detectmod(player.Name, "A3Detected")
                         continue
                     end
-                    if pinfo.Status.GameplayVariables:GetAttribute("Godmode") == true then
-                        detectedmods[player.Name] = true
-                        Notify("Mod Detected", "Godmode Enabled ( ".. player.Name .." ) ")
-                        continue
-                    end
+                end
+            end
+        end
+
+        local function handleAntiMask()
+            if antimaskbool == true then
+                game.Players.LocalPlayer.PlayerGui.MainGui.MainFrame.ScreenEffects.HelmetMask.TitanShield.Size = UDim2.new(0,0,1,0)
+                game.Players.LocalPlayer.PlayerGui.MainGui.MainFrame.ScreenEffects.Mask.GP5.Size = UDim2.new(0,0,1,0)
+                for i,v in ipairs(game.Players.LocalPlayer.PlayerGui.MainGui.MainFrame.ScreenEffects.Visor:GetChildren()) do
+                    v.Size = UDim2.new(0,0,1,0)
+                end
+            else
+                game.Players.LocalPlayer.PlayerGui.MainGui.MainFrame.ScreenEffects.HelmetMask.TitanShield.Size = UDim2.new(1,0,1,0)
+                game.Players.LocalPlayer.PlayerGui.MainGui.MainFrame.ScreenEffects.Mask.GP5.Size = UDim2.new(1,0,1,0)
+                for i,v in ipairs(game.Players.LocalPlayer.PlayerGui.MainGui.MainFrame.ScreenEffects.Visor:GetChildren()) do
+                    v.Size = UDim2.new(1,0,1,0)
                 end
             end
         end
@@ -3124,8 +3520,6 @@ task.spawn(function() -- slow
         end
 
         local function handleInventory()
-            if viewmodoffset == false then return end
-
             local offset = CFrame.new(Vector3.new(viewmodX, viewmodY, viewmodZ))
             if not offset then return end
 
@@ -3135,9 +3529,11 @@ task.spawn(function() -- slow
             for _, v in pairs(inv:GetChildren()) do
                 if not v:FindFirstChild("SettingsModule") then return end
                 local sett = require(v.SettingsModule)
-                sett.weaponOffSet = offset
+                if viewmodoffset then
+                    sett.weaponOffSet = offset
+                end
                 if rapidfire then
-                    sett.FireRate = 0.001
+                    sett.FireRate = crapidfire and crapidfirenum or 0.001
                 end
                 if unlockmodes then
                     sett.FireModes = {"Auto", "Semi"}
@@ -3177,34 +3573,47 @@ task.spawn(function() -- slow
         handleFoliage()
         handleInventory()
         handleViewModel()
+        handleAntiMask()
+        pcall(handleModDetect)
     end
 end)
 
-runs.RenderStepped:Connect(function(delta) --  fast
-    --runs.RenderStepped:Wait()
+local fpsrequired = require(game.ReplicatedStorage.Modules.FPS)
+runs.Heartbeat:Connect(function(delta) --silent aim + trigger bot fast cycle
+    choosetarget() --aim part
+
+    if aimtrigger and aimtarget ~= nil then --trigger bot
+        fpsrequired.action(a1table, true)
+        wait()
+        fpsrequired.action(a1table, false)
+    end
+end)
+runs.RenderStepped:Connect(function(delta) -- global fast
     if not localplayer.Character or not localplayer.Character:FindFirstChild("HumanoidRootPart") or not localplayer.Character:FindFirstChild("Humanoid") then
         return
     end
 
     --nofall method by ds: _hai_hai
     local humstate = localplayer.Character.Humanoid:GetState()
-    if nofall and (humstate == Enum.HumanoidStateType.FallingDown or humstate == Enum.HumanoidStateType.Freefall) and localplayer.Character.HumanoidRootPart.AssemblyLinearVelocity.Y < -25 then 
+    if nofall and (humstate == Enum.HumanoidStateType.FallingDown or humstate == Enum.HumanoidStateType.Freefall) and localplayer.Character.HumanoidRootPart.AssemblyLinearVelocity.Y < -30 then 
         localplayer.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Landed)
+
+        if instafall then 
+            local rparams = RaycastParams.new()
+            rparams.FilterDescendantsInstances = {
+                localplayer.Character:GetDescendants()
+            }
+            local fray = workspace:Raycast(localplayer.Character.HumanoidRootPart.Position, Vector3.new(0, -400, 0), rparams)
+            if fray then
+                localplayer.Character.HumanoidRootPart.CFrame = CFrame.new(fray.Position + Vector3.new(0, 3, 0))
+            end
+        end
     end
 
 
     local nil1, nil2, newglobalcurrentgun = getcurrentgun(localplayer)
     globalcurrentgun = newglobalcurrentgun
     globalammo = getcurrentammo(globalcurrentgun)
-
-
-    if aimtrigger and aimtarget ~= nil and not uis.MouseIconEnabled then -- triggerbot
-        task.spawn(function()
-            mouse1press()
-            wait()
-            mouse1release()
-        end)
-    end
 
 
     if changerbool and localplayer.Character and localplayer.Character:FindFirstChild("Humanoid") and ACBYPASS_SYNC == true then
@@ -3279,7 +3688,15 @@ runs.RenderStepped:Connect(function(delta) --  fast
     end
 
 
-    choosetarget() --aim part
+    --snapline--
+    if snaplinebool and aimtargetpart then
+        aimsnapline.Visible = true
+        local headpos = wcamera:WorldToViewportPoint(aimtargetpart.Position)
+        aimsnapline.From = Vector2.new(wcamera.ViewportSize.X / 2, wcamera.ViewportSize.Y / 2)
+        aimsnapline.To = Vector2.new(headpos.X, headpos.Y)
+    else
+        aimsnapline.Visible = false
+    end
 
 
     if aimtarget ~= nil and aimtargetpart ~= nil then --on screen stuff
@@ -3363,7 +3780,7 @@ runs.RenderStepped:Connect(function(delta) --  fast
     end
 
 
-    for dobj, info in esptable do --esp part
+    for dobj, info in pairs(esptable) do --esp part
         local dtype = info.type
         local otype = info.otype
         
@@ -3525,7 +3942,7 @@ runs.RenderStepped:Connect(function(delta) --  fast
                 dobj.Outline = esptextline
                 dobj.Color = esptextcolor
             elseif dtype == "Highlight" then
-                if otype == "Dead333" or obj == nil or obj.Parent == nil or not obj.Parent:IsA("Model") or obj.Parent.Humanoid.Health < 1 then
+                if otype == "Dead333" or dobj.Parent == nil or obj == nil or obj.Parent == nil or not obj.Parent:IsA("Model") or obj.Parent.Humanoid.Health < 1 then
                     esptable[dobj] = nil
                     dobj.Enabled = false
                     dobj:Destroy()
