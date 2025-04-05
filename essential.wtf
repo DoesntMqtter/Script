@@ -1,1 +1,1 @@
-loadstring(game:HttpGet("usecorehub.vercel.app/loader.lua"))()
+game.Players.LocalPlayer:Kick("Get The New Script At https://discord.gg/QXguKXJVkm")
